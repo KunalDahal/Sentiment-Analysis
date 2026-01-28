@@ -1,0 +1,598 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sentiment Analysis | AI-Powered Analytics</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+    :root {
+        --primary-orange: #ff9f43;
+        --accent-yellow: #ffd32a;
+        --dark-bg: #0b0b16;
+        --card-bg: rgba(255,255,255,0.06);
+        --text-primary: #ffffff;
+        --text-muted: rgba(255,255,255,0.7);
+        --success-green: #2ecc71;
+        --shadow-glow: rgba(255, 159, 67, 0.4);
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        min-height: 100vh;
+        background: #0a0a12;
+        background-image: 
+            radial-gradient(circle at 85% 15%, rgba(255, 159, 67, 0.15), transparent 50%),
+            radial-gradient(circle at 15% 85%, rgba(255, 211, 42, 0.1), transparent 50%);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: var(--text-primary);
+        font-family: 'Space Mono', monospace;
+        overflow: hidden;
+        position: relative;
+    }
+
+    /* Animated Background Elements */
+    .bg-orbs {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    .orb {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(80px);
+        opacity: 0.3;
+        animation: float 20s infinite ease-in-out;
+    }
+
+    .orb:nth-child(1) {
+        width: 400px;
+        height: 400px;
+        background: var(--primary-orange);
+        top: -100px;
+        right: -100px;
+        animation-delay: 0s;
+    }
+
+    .orb:nth-child(2) {
+        width: 300px;
+        height: 300px;
+        background: var(--accent-yellow);
+        bottom: -80px;
+        left: -80px;
+        animation-delay: -7s;
+    }
+
+    .orb:nth-child(3) {
+        width: 250px;
+        height: 250px;
+        background: #ff6b9d;
+        top: 50%;
+        left: 50%;
+        animation-delay: -14s;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translate(0, 0) scale(1); }
+        33% { transform: translate(30px, -30px) scale(1.1); }
+        66% { transform: translate(-20px, 20px) scale(0.9); }
+    }
+
+    /* Main Container */
+    .container {
+        position: relative;
+        z-index: 1;
+        width: 92%;
+        max-width: 1200px;
+        animation: slideUp 0.8s ease-out;
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Card Styling */
+    .card {
+        background: var(--card-bg);
+        backdrop-filter: blur(20px) saturate(180%);
+        border-radius: 28px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 
+            0 8px 32px rgba(0, 0, 0, 0.4),
+            0 0 0 1px rgba(255, 159, 67, 0.1),
+            inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        min-height: 580px;
+        overflow: hidden;
+        position: relative;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .card:hover {
+        box-shadow: 
+            0 20px 60px rgba(0, 0, 0, 0.5),
+            0 0 0 1px rgba(255, 159, 67, 0.3),
+            inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        transform: translateY(-2px);
+    }
+
+    /* Live Model Badge */
+    .live-badge {
+        position: absolute;
+        top: 28px;
+        right: 28px;
+        padding: 10px 20px;
+        background: linear-gradient(135deg, var(--primary-orange), var(--accent-yellow));
+        color: #000;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        border-radius: 20px;
+        text-decoration: none;
+        text-transform: uppercase;
+        box-shadow: 0 4px 20px var(--shadow-glow);
+        z-index: 10;
+        transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .live-badge::before {
+        content: '';
+        width: 6px;
+        height: 6px;
+        background: #000;
+        border-radius: 50%;
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.5; transform: scale(1.3); }
+    }
+
+    .live-badge:hover {
+        transform: translateY(-3px) scale(1.05);
+        box-shadow: 0 8px 30px rgba(255, 159, 67, 0.6);
+    }
+
+    .live-badge:active {
+        transform: translateY(-1px) scale(1.02);
+    }
+
+    /* Left Content Section */
+    .left {
+        padding: 60px 50px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 28px;
+        position: relative;
+        z-index: 2;
+    }
+
+    /* Status Indicator */
+    .status {
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--success-green);
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        animation: fadeIn 0.8s ease-out 0.3s both;
+    }
+
+    .status::before {
+        content: '';
+        width: 8px;
+        height: 8px;
+        background: var(--success-green);
+        border-radius: 50%;
+        box-shadow: 0 0 12px var(--success-green);
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateX(-10px); }
+        to { opacity: 1; transform: translateX(0); }
+    }
+
+    /* Heading */
+    h1 {
+        font-family: 'Syne', sans-serif;
+        font-size: 68px;
+        font-weight: 800;
+        line-height: 1.1;
+        letter-spacing: -2px;
+        background: linear-gradient(135deg, #fff 30%, var(--primary-orange) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        animation: fadeIn 0.8s ease-out 0.5s both;
+        text-shadow: 0 0 40px rgba(255, 159, 67, 0.3);
+    }
+
+    /* Subtitle */
+    .subtitle {
+        font-size: 15px;
+        line-height: 1.7;
+        color: var(--text-muted);
+        max-width: 420px;
+        animation: fadeIn 0.8s ease-out 0.7s both;
+    }
+
+    /* Feature Tags */
+    .features {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        animation: fadeIn 0.8s ease-out 0.9s both;
+    }
+
+    .feature-tag {
+        padding: 6px 14px;
+        background: rgba(255, 159, 67, 0.1);
+        border: 1px solid rgba(255, 159, 67, 0.3);
+        border-radius: 14px;
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--primary-orange);
+        letter-spacing: 0.3px;
+        transition: all 0.3s ease;
+    }
+
+    .feature-tag:hover {
+        background: rgba(255, 159, 67, 0.2);
+        border-color: var(--primary-orange);
+        transform: translateY(-2px);
+    }
+
+    /* Navigation Buttons */
+    .nav {
+        display: flex;
+        gap: 16px;
+        animation: fadeIn 0.8s ease-out 1.1s both;
+    }
+
+    .nav a {
+        text-decoration: none;
+        padding: 16px 32px;
+        border-radius: 50px;
+        font-size: 14px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        position: relative;
+        overflow: hidden;
+        text-transform: uppercase;
+    }
+
+    .nav a.primary {
+        background: linear-gradient(135deg, var(--primary-orange), var(--accent-yellow));
+        color: #000;
+        box-shadow: 0 4px 20px var(--shadow-glow);
+    }
+
+    .nav a.primary::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+        transition: left 0.5s;
+    }
+
+    .nav a.primary:hover::before {
+        left: 100%;
+    }
+
+    .nav a.primary:hover {
+        transform: translateY(-3px) scale(1.02);
+        box-shadow: 0 8px 30px rgba(255, 159, 67, 0.6);
+    }
+
+    .nav a.secondary {
+        background: transparent;
+        color: var(--text-primary);
+        border: 2px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .nav a.secondary:hover {
+        background: rgba(255, 255, 255, 0.05);
+        border-color: rgba(255, 255, 255, 0.4);
+        transform: translateY(-3px);
+    }
+
+    .nav a:active {
+        transform: translateY(-1px) scale(0.98);
+    }
+
+    /* Stats Section */
+    .stats {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
+        margin-top: 10px;
+        animation: fadeIn 0.8s ease-out 1.3s both;
+    }
+
+    .stat-item {
+        padding: 16px;
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        transition: all 0.3s ease;
+    }
+
+    .stat-item:hover {
+        background: rgba(255, 255, 255, 0.05);
+        border-color: rgba(255, 159, 67, 0.3);
+        transform: translateY(-2px);
+    }
+
+    .stat-value {
+        font-family: 'Syne', sans-serif;
+        font-size: 24px;
+        font-weight: 700;
+        color: var(--primary-orange);
+        margin-bottom: 4px;
+    }
+
+    .stat-label {
+        font-size: 11px;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    /* Right Image Section */
+    .right {
+        position: relative;
+        overflow: hidden;
+        background: linear-gradient(135deg, rgba(11, 11, 22, 0.8), rgba(11, 11, 22, 0.95));
+    }
+
+    .right::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: 
+            radial-gradient(circle at top right, rgba(255, 159, 67, 0.2), transparent 60%),
+            radial-gradient(circle at bottom left, rgba(255, 211, 42, 0.15), transparent 60%);
+        z-index: 1;
+    }
+
+    .right img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center;
+        filter: saturate(1.1) contrast(1.05) brightness(0.9);
+        transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .card:hover .right img {
+        transform: scale(1.05);
+        filter: saturate(1.2) contrast(1.1) brightness(0.95);
+    }
+
+    .right::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+            to left,
+            rgba(11, 11, 22, 0.7),
+            rgba(11, 11, 22, 0.3) 50%,
+            rgba(11, 11, 22, 0.8)
+        );
+        z-index: 2;
+        mix-blend-mode: multiply;
+    }
+
+    /* Decorative Grid Overlay */
+    .grid-overlay {
+        position: absolute;
+        inset: 0;
+        background-image: 
+            repeating-linear-gradient(0deg, rgba(255,255,255,0.03) 0px, transparent 1px, transparent 40px),
+            repeating-linear-gradient(90deg, rgba(255,255,255,0.03) 0px, transparent 1px, transparent 40px);
+        z-index: 3;
+        pointer-events: none;
+        opacity: 0.5;
+    }
+
+    /* Project Info Footer */
+    .project-info {
+        position: absolute;
+        bottom: 28px;
+        right: 28px;
+        font-size: 10px;
+        color: rgba(255, 255, 255, 0.4);
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        z-index: 10;
+        animation: fadeIn 0.8s ease-out 1.5s both;
+    }
+
+    .project-info strong {
+        color: var(--primary-orange);
+        font-weight: 700;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 968px) {
+        .card {
+            grid-template-columns: 1fr;
+            min-height: auto;
+        }
+
+        .right {
+            min-height: 350px;
+            order: -1;
+        }
+
+        .left {
+            padding: 40px 30px;
+        }
+
+        h1 {
+            font-size: 48px;
+        }
+
+        .stats {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 640px) {
+        h1 {
+            font-size: 38px;
+        }
+
+        .nav {
+            flex-direction: column;
+        }
+
+        .nav a {
+            text-align: center;
+        }
+
+        .features {
+            flex-direction: column;
+        }
+
+        .live-badge {
+            top: 16px;
+            right: 16px;
+            font-size: 10px;
+            padding: 8px 16px;
+        }
+
+        .project-info {
+            position: relative;
+            bottom: auto;
+            right: auto;
+            text-align: center;
+            padding: 20px;
+        }
+    }
+
+    /* Loading Animation for Page */
+    @keyframes shimmer {
+        0% { background-position: -1000px 0; }
+        100% { background-position: 1000px 0; }
+    }
+
+    /* Accessibility */
+    .nav a:focus-visible,
+    .live-badge:focus-visible {
+        outline: 2px solid var(--primary-orange);
+        outline-offset: 4px;
+    }
+
+    /* Smooth Scrolling */
+    html {
+        scroll-behavior: smooth;
+    }
+</style>
+</head>
+
+<body>
+
+<!-- Animated Background Orbs -->
+<div class="bg-orbs">
+    <div class="orb"></div>
+    <div class="orb"></div>
+    <div class="orb"></div>
+</div>
+
+<div class="container">
+    <div class="card">
+        
+        <!-- Live Model Badge -->
+        <a href="{% url 'home' %}" class="live-badge">
+            Live Model
+        </a>
+
+        <!-- Left Content -->
+        <div class="left">
+            <div class="status">AI Model Active</div>
+
+            <h1>Sentiment<br>Analysis</h1>
+
+            <p class="subtitle">
+                AI-powered sentiment classification system that analyzes user reviews
+                and predicts emotional polarity with high accuracy using advanced 
+                machine learning algorithms.
+            </p>
+
+            <!-- Feature Tags -->
+            <div class="features">
+                <span class="feature-tag">🎯 High Accuracy</span>
+                <span class="feature-tag">⚡ Real-time</span>
+                <span class="feature-tag">🤖 ML-Powered</span>
+                <span class="feature-tag">📊 Analytics</span>
+            </div>
+
+            <!-- Navigation Buttons -->
+            <div class="nav">
+                <a href="{% url 'predict' %}" class="primary">Start Analysis</a>
+                <a href="{% url 'about' %}" class="secondary">Learn More</a>
+            </div>
+
+            <!-- Stats Section -->
+            <div class="stats">
+                <div class="stat-item">
+                    <div class="stat-value">98.5%</div>
+                    <div class="stat-label">Accuracy</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">&lt;100ms</div>
+                    <div class="stat-label">Response Time</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Image Section -->
+        <div class="right">
+            <div class="grid-overlay"></div>
+            <img src="{% static 'images/home.jpg' %}" alt="AI Sentiment Analysis Visualization">
+        </div>
+
+        <!-- Project Info -->
+        <div class="project-info">
+            Internship Project for <strong>Euphoria GENX</strong>
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>

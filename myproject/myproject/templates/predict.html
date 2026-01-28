@@ -1,0 +1,922 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Predict Sentiment | AI Analysis</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+    :root {
+        --primary-orange: #ff9f43;
+        --accent-yellow: #ffd32a;
+        --deep-orange: #ff6b35;
+        --dark-bg: #0a0a12;
+        --darker-bg: #0b0b16;
+        --card-bg: rgba(255, 159, 67, 0.03);
+        --text-primary: #ffffff;
+        --text-muted: rgba(255, 255, 255, 0.6);
+        --border-glow: rgba(255, 159, 67, 0.3);
+        --success: #2ecc71;
+        --error: #ff0055;
+        --neutral: #f39c12;
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        min-height: 100vh;
+        background: var(--darker-bg);
+        background-image: 
+            radial-gradient(circle at 20% 30%, rgba(255, 159, 67, 0.1), transparent 40%),
+            radial-gradient(circle at 80% 70%, rgba(255, 211, 42, 0.08), transparent 40%),
+            radial-gradient(circle at 50% 50%, rgba(255, 107, 53, 0.15), transparent 70%);
+        color: var(--text-primary);
+        font-family: 'Space Mono', monospace;
+        overflow-x: hidden;
+        position: relative;
+    }
+
+    /* Animated Grid Background */
+    .grid-bg {
+        position: fixed;
+        inset: 0;
+        background-image: 
+            linear-gradient(rgba(255, 159, 67, 0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255, 159, 67, 0.03) 1px, transparent 1px);
+        background-size: 50px 50px;
+        animation: gridMove 20s linear infinite;
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    @keyframes gridMove {
+        0% { transform: translate(0, 0); }
+        100% { transform: translate(50px, 50px); }
+    }
+
+    /* Floating Particles */
+    .particles {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    .particle {
+        position: absolute;
+        width: 2px;
+        height: 2px;
+        background: var(--primary-orange);
+        border-radius: 50%;
+        opacity: 0.4;
+        animation: float-particle 15s infinite ease-in-out;
+    }
+
+    .particle:nth-child(1) { left: 10%; top: 20%; animation-delay: 0s; }
+    .particle:nth-child(2) { left: 30%; top: 60%; animation-delay: -3s; }
+    .particle:nth-child(3) { left: 50%; top: 30%; animation-delay: -6s; }
+    .particle:nth-child(4) { left: 70%; top: 70%; animation-delay: -9s; }
+    .particle:nth-child(5) { left: 90%; top: 40%; animation-delay: -12s; }
+    .particle:nth-child(6) { left: 20%; top: 80%; animation-delay: -2s; }
+    .particle:nth-child(7) { left: 60%; top: 10%; animation-delay: -5s; }
+    .particle:nth-child(8) { left: 85%; top: 85%; animation-delay: -8s; }
+
+    @keyframes float-particle {
+        0%, 100% { transform: translateY(0) translateX(0); opacity: 0.4; }
+        25% { transform: translateY(-30px) translateX(10px); opacity: 0.6; }
+        50% { transform: translateY(-60px) translateX(-10px); opacity: 0.8; }
+        75% { transform: translateY(-30px) translateX(20px); opacity: 0.6; }
+    }
+
+    /* Main Container */
+    .container {
+        position: relative;
+        z-index: 1;
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 40px 20px;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    /* Header */
+    .header {
+        text-align: center;
+        margin-bottom: 50px;
+        animation: slideDown 0.8s ease-out;
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .header-label {
+        font-family: 'Syne', sans-serif;
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--primary-orange);
+        text-transform: uppercase;
+        letter-spacing: 3px;
+        margin-bottom: 10px;
+        display: inline-block;
+        padding: 8px 20px;
+        border: 1px solid var(--border-glow);
+        border-radius: 20px;
+        background: rgba(255, 159, 67, 0.05);
+        box-shadow: 0 0 20px rgba(255, 159, 67, 0.2);
+    }
+
+    h1 {
+        font-family: 'Syne', sans-serif;
+        font-size: 56px;
+        font-weight: 900;
+        letter-spacing: -1px;
+        background: linear-gradient(135deg, var(--primary-orange), var(--accent-yellow), #ffffff);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 15px;
+        text-shadow: 0 0 40px rgba(255, 159, 67, 0.3);
+    }
+
+    .header-desc {
+        font-size: 16px;
+        color: var(--text-muted);
+        max-width: 600px;
+        margin: 0 auto;
+        line-height: 1.6;
+    }
+
+    /* Main Card */
+    .predict-card {
+        background: var(--card-bg);
+        backdrop-filter: blur(20px);
+        border-radius: 24px;
+        border: 1px solid rgba(255, 159, 67, 0.2);
+        box-shadow: 
+            0 8px 32px rgba(0, 0, 0, 0.4),
+            inset 0 1px 0 rgba(255, 255, 255, 0.05),
+            0 0 40px rgba(255, 159, 67, 0.1);
+        padding: 45px;
+        position: relative;
+        overflow: hidden;
+        animation: fadeInUp 0.8s ease-out 0.2s both;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .predict-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, var(--primary-orange), transparent);
+        animation: shimmer 3s infinite;
+    }
+
+    @keyframes shimmer {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(100%); }
+    }
+
+    /* Model Selection */
+    .section-title {
+        font-family: 'Syne', sans-serif;
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--primary-orange);
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .section-title::before {
+        content: '';
+        width: 4px;
+        height: 16px;
+        background: var(--primary-orange);
+        border-radius: 2px;
+        box-shadow: 0 0 10px var(--primary-orange);
+    }
+
+    .model-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 16px;
+        margin-bottom: 40px;
+    }
+
+    .model-option {
+        position: relative;
+        cursor: pointer;
+    }
+
+    .model-option input[type="radio"] {
+        position: absolute;
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .model-card {
+        padding: 24px;
+        background: rgba(255, 107, 53, 0.08);
+        border: 2px solid rgba(255, 159, 67, 0.2);
+        border-radius: 16px;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .model-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 159, 67, 0.1), transparent);
+        transition: left 0.6s;
+    }
+
+    .model-option:hover .model-card::before {
+        left: 100%;
+    }
+
+    .model-option:hover .model-card {
+        transform: translateY(-4px);
+        border-color: rgba(255, 159, 67, 0.5);
+        box-shadow: 0 8px 30px rgba(255, 159, 67, 0.2);
+    }
+
+    .model-option input[type="radio"]:checked + .model-card {
+        background: rgba(255, 159, 67, 0.15);
+        border-color: var(--primary-orange);
+        box-shadow: 
+            0 0 30px rgba(255, 159, 67, 0.3),
+            inset 0 0 20px rgba(255, 159, 67, 0.1);
+    }
+
+    .model-option input[type="radio"]:checked + .model-card::after {
+        content: '✓';
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        width: 24px;
+        height: 24px;
+        background: var(--primary-orange);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--darker-bg);
+        animation: checkPop 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    }
+
+    @keyframes checkPop {
+        0% { transform: scale(0); }
+        100% { transform: scale(1); }
+    }
+
+    .model-name {
+        font-family: 'Syne', sans-serif;
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 8px;
+    }
+
+    .model-desc {
+        font-size: 13px;
+        color: var(--text-muted);
+        line-height: 1.5;
+        margin-bottom: 12px;
+    }
+
+    .model-stats {
+        display: flex;
+        gap: 16px;
+        font-size: 12px;
+    }
+
+    .stat {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    .stat-label {
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-size: 10px;
+    }
+
+    .stat-value {
+        color: var(--primary-orange);
+        font-weight: 700;
+        font-family: 'Syne', sans-serif;
+    }
+
+    /* Input Section */
+    .input-section {
+        margin-bottom: 30px;
+    }
+
+    .input-wrapper {
+        position: relative;
+    }
+
+    .input-field {
+        width: 100%;
+        min-height: 140px;
+        padding: 20px;
+        background: rgba(255, 107, 53, 0.08);
+        border: 2px solid rgba(255, 159, 67, 0.2);
+        border-radius: 16px;
+        color: var(--text-primary);
+        font-family: 'Space Mono', monospace;
+        font-size: 16px;
+        line-height: 1.6;
+        resize: vertical;
+        transition: all 0.3s ease;
+    }
+
+    .input-field:focus {
+        outline: none;
+        border-color: var(--primary-orange);
+        box-shadow: 
+            0 0 30px rgba(255, 159, 67, 0.2),
+            inset 0 0 20px rgba(255, 159, 67, 0.05);
+        background: rgba(255, 107, 53, 0.12);
+    }
+
+    .input-field::placeholder {
+        color: rgba(255, 255, 255, 0.3);
+    }
+
+    .char-count {
+        position: absolute;
+        bottom: 12px;
+        right: 16px;
+        font-size: 11px;
+        color: var(--text-muted);
+        font-family: 'Syne', sans-serif;
+        pointer-events: none;
+    }
+
+    /* Quick Examples */
+    .quick-examples {
+        margin-top: 16px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .example-chip {
+        padding: 8px 16px;
+        background: rgba(255, 159, 67, 0.08);
+        border: 1px solid rgba(255, 159, 67, 0.3);
+        border-radius: 20px;
+        font-size: 13px;
+        color: var(--primary-orange);
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .example-chip:hover {
+        background: rgba(255, 159, 67, 0.15);
+        border-color: var(--primary-orange);
+        transform: translateY(-2px);
+    }
+
+    /* Action Buttons */
+    .action-buttons {
+        display: flex;
+        gap: 16px;
+        margin-bottom: 30px;
+    }
+
+    .btn {
+        flex: 1;
+        padding: 18px 32px;
+        border-radius: 50px;
+        font-family: 'Syne', sans-serif;
+        font-size: 14px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+        border: none;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, var(--primary-orange), var(--accent-yellow));
+        color: var(--darker-bg);
+        box-shadow: 0 4px 20px rgba(255, 159, 67, 0.4);
+    }
+
+    .btn-primary::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+        transition: width 0.6s, height 0.6s;
+    }
+
+    .btn-primary:hover::before {
+        width: 300px;
+        height: 300px;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 30px rgba(255, 159, 67, 0.6);
+    }
+
+    .btn-secondary {
+        background: transparent;
+        color: var(--text-primary);
+        border: 2px solid rgba(255, 159, 67, 0.3);
+    }
+
+    .btn-secondary:hover {
+        background: rgba(255, 159, 67, 0.1);
+        border-color: var(--primary-orange);
+        transform: translateY(-3px);
+    }
+
+    .btn:active {
+        transform: translateY(-1px) scale(0.98);
+    }
+
+    .btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none !important;
+    }
+
+    /* Result Section */
+    .result-section {
+        display: none;
+        padding: 30px;
+        background: rgba(255, 107, 53, 0.08);
+        border: 2px solid rgba(255, 159, 67, 0.3);
+        border-radius: 16px;
+        animation: resultSlideIn 0.5s ease-out;
+    }
+
+    .result-section.show {
+        display: block;
+    }
+
+    @keyframes resultSlideIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .result-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 20px;
+    }
+
+    .result-title {
+        font-family: 'Syne', sans-serif;
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--primary-orange);
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+    }
+
+    .sentiment-badge {
+        padding: 8px 20px;
+        border-radius: 20px;
+        font-family: 'Syne', sans-serif;
+        font-size: 14px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .sentiment-positive {
+        background: rgba(0, 255, 136, 0.2);
+        color: var(--success);
+        border: 2px solid var(--success);
+        box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+    }
+
+    .sentiment-negative {
+        background: rgba(255, 0, 85, 0.2);
+        color: var(--error);
+        border: 2px solid var(--error);
+        box-shadow: 0 0 20px rgba(255, 0, 85, 0.3);
+    }
+
+    .sentiment-neutral {
+        background: rgba(243, 156, 18, 0.2);
+        color: var(--neutral);
+        border: 2px solid var(--neutral);
+        box-shadow: 0 0 20px rgba(243, 156, 18, 0.3);
+    }
+
+    /* Loading State */
+    .loading {
+        display: none;
+        text-align: center;
+        padding: 40px;
+    }
+
+    .loading.show {
+        display: block;
+    }
+
+    .loading-spinner {
+        width: 50px;
+        height: 50px;
+        margin: 0 auto 20px;
+        border: 3px solid rgba(255, 159, 67, 0.2);
+        border-top-color: var(--primary-orange);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    .loading-text {
+        color: var(--text-muted);
+        font-family: 'Syne', sans-serif;
+        font-size: 14px;
+        letter-spacing: 1px;
+    }
+
+    /* Back Button */
+    .back-link {
+        position: fixed;
+        top: 30px;
+        left: 30px;
+        padding: 12px 24px;
+        background: rgba(255, 159, 67, 0.1);
+        border: 1px solid rgba(255, 159, 67, 0.3);
+        border-radius: 30px;
+        color: var(--primary-orange);
+        text-decoration: none;
+        font-family: 'Syne', sans-serif;
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        transition: all 0.3s ease;
+        z-index: 100;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .back-link:hover {
+        background: rgba(255, 159, 67, 0.2);
+        border-color: var(--primary-orange);
+        transform: translateX(-4px);
+        box-shadow: 0 4px 20px rgba(255, 159, 67, 0.3);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        h1 {
+            font-size: 38px;
+        }
+
+        .predict-card {
+            padding: 30px 25px;
+        }
+
+        .model-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+        }
+
+        .back-link {
+            top: 20px;
+            left: 20px;
+            padding: 10px 20px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        h1 {
+            font-size: 32px;
+        }
+
+        .header-label {
+            font-size: 10px;
+            letter-spacing: 2px;
+        }
+
+        .quick-examples {
+            flex-direction: column;
+        }
+    }
+</style>
+</head>
+
+<body>
+
+<!-- Background Elements -->
+<div class="grid-bg"></div>
+<div class="particles">
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+</div>
+
+<!-- Back Button -->
+<a href="{% url 'home' %}" class="back-link">
+    ←
+</a>
+
+<!-- Main Container -->
+<div class="container">
+    
+    <!-- Header -->
+    <div class="header">
+        <div class="header-label">AI-Powered Analysis</div>
+        <h1>Predict Sentiment</h1>
+        <p class="header-desc">
+            Enter your text and select a machine learning model to analyze sentiment polarity with advanced AI algorithms.
+        </p>
+    </div>
+
+    <!-- Main Card -->
+    <div class="predict-card">
+        
+        <!-- Model Selection -->
+        <div class="section-title">Select ML Model</div>
+        <form method="POST" action="{% url 'predict' %}" id="predictionForm">
+            {% csrf_token %}
+            
+            <div class="model-grid">
+                <label class="model-option">
+                    <input type="radio" name="model" value="logistic" {% if selected_model == "logistic" %}checked{% endif %}>
+                    <div class="model-card">
+                        <div class="model-name">Logistic Regression</div>
+                        <div class="model-desc">Statistical linear model for binary classification with high interpretability</div>
+                        <div class="model-stats">
+                            <div class="stat">
+                                <span class="stat-label">Accuracy</span>
+                                <span class="stat-value">94.2%</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-label">Speed</span>
+                                <span class="stat-value">Fast</span>
+                            </div>
+                        </div>
+                    </div>
+                </label>
+
+                <label class="model-option">
+                    <input type="radio" name="model" value="naive_bayes" {% if selected_model == "naive_bayes" %}checked{% endif %}>
+                    <div class="model-card">
+                        <div class="model-name">Naive Bayes</div>
+                        <div class="model-desc">Probabilistic classifier based on Bayes' theorem with strong independence assumptions</div>
+                        <div class="model-stats">
+                            <div class="stat">
+                                <span class="stat-label">Accuracy</span>
+                                <span class="stat-value">92.8%</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-label">Speed</span>
+                                <span class="stat-value">Very Fast</span>
+                            </div>
+                        </div>
+                    </div>
+                </label>
+
+                <label class="model-option">
+                    <input type="radio" name="model" value="svm" {% if selected_model == "svm" %}checked{% endif %}>
+                    <div class="model-card">
+                        <div class="model-name">Linear SVM</div>
+                        <div class="model-desc">Support Vector Machine that finds optimal hyperplane for classification</div>
+                        <div class="model-stats">
+                            <div class="stat">
+                                <span class="stat-label">Accuracy</span>
+                                <span class="stat-value">95.6%</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-label">Speed</span>
+                                <span class="stat-value">Medium</span>
+                            </div>
+                        </div>
+                    </div>
+                </label>
+            </div>
+
+            <!-- Input Section -->
+            <div class="input-section">
+                <div class="section-title">Enter Text to Analyze</div>
+                <div class="input-wrapper">
+                    <textarea 
+                        class="input-field" 
+                        name="text" 
+                        id="textInput"
+                        placeholder="Type or paste your review, comment, or any text you want to analyze..."
+                        maxlength="5000"
+                        required
+                    >{{ text }}</textarea>
+                    <div class="char-count">
+                        <span id="charCount">0</span> / 5000
+                    </div>
+                </div>
+
+                <!-- Quick Examples -->
+                <div class="quick-examples">
+                    <div class="example-chip" onclick="fillExample('This product exceeded all my expectations! Absolutely fantastic quality and service.')">
+                        Positive Example
+                    </div>
+                    <div class="example-chip" onclick="fillExample('Terrible experience. The product broke after one week and customer service was unhelpful.')">
+                        Negative Example
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <button type="submit" class="btn btn-primary" id="analyzeBtn">
+                    <span>Analyze Sentiment</span>
+                </button>
+                <button type="button" class="btn btn-secondary" onclick="clearForm()">
+                    Clear
+                </button>
+            </div>
+        </form>
+
+        <!-- Loading State -->
+        <div class="loading" id="loadingState">
+            <div class="loading-spinner"></div>
+            <div class="loading-text">Analyzing sentiment...</div>
+        </div>
+
+        <!-- Result Section -->
+        <div class="result-section" id="resultSection">
+            <div class="result-header">
+                <div class="result-title">Analysis Result</div>
+                {% if result %}
+                    <div class="sentiment-badge sentiment-{{ result.sentiment|lower }}" id="sentimentBadge">
+                        {{ result.sentiment }}
+                    </div>
+                {% else %}
+                    <div class="sentiment-badge sentiment-positive" id="sentimentBadge">
+                        Positive
+                    </div>
+                {% endif %}
+            </div>
+            
+            {% if result %}
+            <div style="margin-top: 20px; padding: 15px; background: rgba(255, 159, 67, 0.05); border-radius: 10px;">
+                <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 5px;">Model Used:</div>
+                <div style="font-family: 'Syne', sans-serif; font-weight: 600; color: var(--primary-orange);">
+                    {{ result.model_name }}
+                </div>
+                {% if result.text_preview %}
+                <div style="margin-top: 10px; font-size: 13px; color: var(--text-muted); font-style: italic;">
+                    "{{ result.text_preview }}"
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+    const textInput = document.getElementById('textInput');
+    const charCount = document.getElementById('charCount');
+    const form = document.getElementById('predictionForm');
+    const loadingState = document.getElementById('loadingState');
+    const resultSection = document.getElementById('resultSection');
+    
+    // Character count update
+    textInput.addEventListener('input', function() {
+        charCount.textContent = this.value.length;
+    });
+
+    // Fill example text
+    function fillExample(text) {
+        textInput.value = text;
+        charCount.textContent = text.length;
+        textInput.focus();
+    }
+
+    // Clear form
+    function clearForm() {
+        textInput.value = '';
+        charCount.textContent = '0';
+        resultSection.classList.remove('show');
+    }
+
+    // Form submission handler
+    form.addEventListener('submit', function(e) {
+        // Basic validation
+        if (textInput.value.trim().length < 3) {
+            e.preventDefault();
+            alert('Please enter at least 3 characters for analysis.');
+            return;
+        }
+        
+        // Show loading
+        loadingState.classList.add('show');
+        resultSection.classList.remove('show');
+    });
+
+    // Check if there's result data from Django and display it
+    document.addEventListener('DOMContentLoaded', function() {
+        // Update character count on page load if there's text
+        if (textInput.value) {
+            charCount.textContent = textInput.value.length;
+        }
+        
+        {% if result %}
+            // Update UI with result from Django backend
+            const badge = document.getElementById('sentimentBadge');
+            
+            badge.textContent = '{{ result.sentiment }}';
+            badge.className = 'sentiment-badge sentiment-{{ result.sentiment|lower }}';
+            
+            // Show result section
+            resultSection.classList.add('show');
+            
+            // Hide loading state if it's showing
+            loadingState.classList.remove('show');
+        {% endif %}
+    });
+
+    // Ctrl+Enter to submit
+    textInput.addEventListener('keydown', function(e) {
+        if (e.ctrlKey && e.key === 'Enter') {
+            form.dispatchEvent(new Event('submit'));
+        }
+    });
+</script>
+
+</body>
+</html>
