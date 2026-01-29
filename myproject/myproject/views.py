@@ -10,7 +10,7 @@ from django.conf import settings
 # Classical ML Model Loading
 # ======================
 
-MODELS_DIR = os.path.join(settings.BASE_DIR, "models")   # classical models (.pkl)
+MODELS_DIR = os.path.join(settings.BASE_DIR, "model")   # classical models (.pkl)
 available_models = {}
 
 for model_file in os.listdir(MODELS_DIR):
