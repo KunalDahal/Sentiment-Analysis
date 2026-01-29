@@ -352,6 +352,14 @@
         letter-spacing: 1px;
     }
 
+    .member-contribution {
+        font-size: 12px;
+        color: var(--text-muted);
+        font-style: italic;
+        line-height: 1.4;
+        margin-top: 8px;
+    }
+
     /* Process Steps */
     .process-steps {
         margin-top: 20px;
@@ -509,7 +517,7 @@
         <div class="header-label">About the Project</div>
         <h1>Sentiment Analyzer</h1>
         <p class="header-desc">
-            A machine learning-powered web application for analyzing customer sentiment from product reviews using advanced natural language processing techniques.
+            A machine learning-powered web application for analyzing customer sentiment from product reviews using advanced deep learning and machine learning algorithms.
         </p>
     </div>
 
@@ -521,7 +529,7 @@
                 This project focuses on <strong>analyzing customer sentiment from Flipkart product reviews</strong> to classify opinions as positive, negative, or neutral. Understanding customer sentiment is crucial for businesses to gain insights into customer satisfaction, identify product strengths and weaknesses, and make data-driven decisions.
             </p>
             <p>
-                <strong>Sentiment analysis</strong> is a natural language processing technique that uses machine learning to determine the emotional tone behind text data. By automatically classifying reviews, businesses can quickly understand customer feedback at scale without manual review reading.
+                <strong>Sentiment analysis</strong> leverages deep learning and machine learning algorithms to determine the emotional tone behind text data. By automatically classifying reviews, businesses can quickly understand customer feedback at scale without manual review reading.
             </p>
             <p>
                 Our solution helps e-commerce platforms and businesses to:
@@ -606,24 +614,54 @@
         </div>
     </div>
 
-    <!-- Machine Learning Model -->
+    <!-- Deep Learning Model -->
     <div class="section-card">
-        <div class="section-title">Machine Learning Model</div>
+        <div class="section-title">Deep Learning Model</div>
         <div class="section-content">
             <p>
-                Our sentiment classification system employs <strong>supervised machine learning algorithms</strong> trained on preprocessed Flipkart customer reviews. The model can predict sentiment (positive, negative, or neutral) for any new user-provided text input.
+                Our advanced sentiment classification leverages <strong>deep learning architecture</strong> to capture complex patterns in text data. The deep learning approach provides superior contextual understanding compared to traditional methods.
             </p>
+            <p>
+                <strong>Model Architecture:</strong>
+            </p>
+            <ul style="list-style: none; padding-left: 0;">
+                <li style="padding: 8px 0; color: var(--text-muted);">▸ <strong>BiLSTM (Bidirectional Long Short-Term Memory)</strong> - Analyzes text in both forward and backward directions for comprehensive context understanding</li>
+                <li style="padding: 8px 0; color: var(--text-muted);">▸ Captures long-range dependencies in review text</li>
+                <li style="padding: 8px 0; color: var(--text-muted);">▸ Handles sequential patterns and contextual relationships</li>
+                <li style="padding: 8px 0; color: var(--text-muted);">▸ Superior performance on complex sentiment expressions</li>
+            </ul>
+            <p>
+                The BiLSTM architecture was implemented and optimized by <strong>Abishek Prasad</strong>, achieving state-of-the-art results on our dataset through careful tuning of network parameters and training strategies.
+            </p>
+        </div>
+    </div>
+
+    <!-- Machine Learning Models -->
+    <div class="section-card">
+        <div class="section-title">Machine Learning Models</div>
+        <div class="section-content">
+            <p>
+                Our sentiment classification system also employs multiple <strong>traditional machine learning algorithms</strong> trained on preprocessed Flipkart customer reviews. These models provide fast, efficient predictions while maintaining high accuracy.
+            </p>
+            <p>
+                <strong>Implemented Algorithms:</strong>
+            </p>
+            <ul style="list-style: none; padding-left: 0;">
+                <li style="padding: 8px 0; color: var(--text-muted);">▸ <strong>Linear SVM (Support Vector Machine)</strong> - Finds optimal hyperplane for sentiment classification</li>
+                <li style="padding: 8px 0; color: var(--text-muted);">▸ <strong>Logistic Regression</strong> - Probabilistic approach for binary and multi-class sentiment prediction</li>
+                <li style="padding: 8px 0; color: var(--text-muted);">▸ <strong>Naive Bayes</strong> - Fast probabilistic classifier based on Bayes' theorem</li>
+            </ul>
             <p>
                 <strong>Model Characteristics:</strong>
             </p>
             <ul style="list-style: none; padding-left: 0;">
-                <li style="padding: 8px 0; color: var(--text-muted);">▸ Multiple algorithms tested (Logistic Regression, Naive Bayes, SVM)</li>
                 <li style="padding: 8px 0; color: var(--text-muted);">▸ High accuracy on validation data (>90%)</li>
                 <li style="padding: 8px 0; color: var(--text-muted);">▸ Fast inference time for real-time predictions</li>
                 <li style="padding: 8px 0; color: var(--text-muted);">▸ Robust to different writing styles and review formats</li>
+                <li style="padding: 8px 0; color: var(--text-muted);">▸ Efficient resource utilization for deployment</li>
             </ul>
             <p>
-                The model architecture was carefully designed and optimized through iterative training and hyperparameter tuning to achieve the best balance between accuracy and performance.
+                These machine learning models were developed and optimized by <strong>Kunal Dahal</strong> through comprehensive experimentation and hyperparameter tuning to achieve the best balance between accuracy and performance.
             </p>
         </div>
     </div>
@@ -646,7 +684,7 @@
                 <li style="padding: 8px 0; color: var(--text-muted);">▸ Responsive design for desktop and mobile devices</li>
             </ul>
             <p>
-                This demonstrates our ability to deploy machine learning models into production-ready applications, bridging the gap between data science and real-world usability.
+                This demonstrates our ability to deploy machine learning models into production-ready applications, effectively bridging the gap between data science and real-world usability. The frontend and backend of the application were developed by <strong>Riddhi Shree</strong> and <strong>Natasha Rai</strong>.
             </p>
         </div>
     </div>
@@ -672,17 +710,16 @@
                         <li>Python 3.x</li>
                         <li>Django Framework</li>
                         <li>Django Templates</li>
-                        <li>RESTful Architecture</li>
                     </ul>
                 </div>
 
                 <div class="tech-category">
-                    <div class="tech-category-title">Machine Learning</div>
+                    <div class="tech-category-title">Machine Learning & Deep Learning</div>
                     <ul class="tech-list">
+                        <li>TensorFlow / Keras</li>
                         <li>Scikit-learn</li>
                         <li>Pandas</li>
                         <li>NumPy</li>
-                        <li>NLTK / NLP Tools</li>
                     </ul>
                 </div>
 
@@ -727,22 +764,26 @@
             <div class="team-grid">
                 <div class="team-member">
                     <div class="member-name">Abishek Prasad</div>
-                    <div class="member-role">ML Model Designer</div>
+                    <div class="member-role">Deep Learning Model Developer</div>
+                    <div class="member-contribution">BiLSTM Architecture Implementation</div>
                 </div>
 
                 <div class="team-member">
                     <div class="member-name">Kunal Dahal</div>
-                    <div class="member-role">ML Model Designer</div>
+                    <div class="member-role">Machine Learning Model Developer</div>
+                    <div class="member-contribution">Linear SVM, Logistic Regression, Naive Bayes</div>
                 </div>
 
                 <div class="team-member">
                     <div class="member-name">Natasha Rai</div>
-                    <div class="member-role">Backend & Frontend Developer</div>
+                    <div class="member-role">Web Developer & Documentation</div>
+                    <div class="member-contribution">Backend & Frontend Development</div>
                 </div>
 
                 <div class="team-member">
                     <div class="member-name">Riddhi Shree</div>
-                    <div class="member-role">Backend & Frontend Developer</div>
+                    <div class="member-role">Web Developer & Documentation</div>
+                    <div class="member-contribution">Backend & Frontend Development</div>
                 </div>
             </div>
 
